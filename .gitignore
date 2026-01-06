@@ -1,0 +1,29 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS / editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# Model artifacts
+models/
+*.pt
+*.bin
+*.safetensors
+*.ckpt
+*.onnx
+
+# Training and data
+data/
+weights/
+checkpoints/
+
+
