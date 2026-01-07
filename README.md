@@ -1,4 +1,7 @@
 ## Small Fine-Tuned LLM for IT Ticket Triage & Automation
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat-square)](LICENSE)
+[![LoRA](https://img.shields.io/badge/LoRA%20%2F%20QLoRA-supported-6f42c1.svg?style=flat-square)](#)
+[![Deployment](https://img.shields.io/badge/deployment-self--hosted-lightgrey.svg?style=flat-square)](#)
 
 This project is a **practical framework** for turning **raw IT
 issue text** into **strict, schema-constrained JSON tickets** for ITSM tools
