@@ -6,6 +6,7 @@ from transformers import AutoTokenizer
 sys.path.append(str(Path(__file__).parent.parent))
 from configs.model_config import qwen_1_5b as model_config
 
+# Not working
 
 def check_tokenization():
     """Check tokenizer on sample data."""
@@ -68,14 +69,14 @@ def check_tokenization():
         
         # Check for issues
         if len(token_ids) > model_config.MODEL_MAX_LENGTH:
-            print(f"  ⚠️  WARNING: Exceeds max length ({len(token_ids)} > {model_config.MODEL_MAX_LENGTH})")
+            print(f"Exceeds max length ({len(token_ids)} > {model_config.MODEL_MAX_LENGTH})")
         
         # Decode back
         decoded = tokenizer.decode(token_ids)
         if decoded.strip() != prompt.strip():
-            print(f"  ⚠️  WARNING: Decode mismatch")
+            print(f"Decode mismatch")
         else:
-            print(f"  ✓ Tokenization OK")
+            print(f"Tokenization OK")
         
         print()
     
