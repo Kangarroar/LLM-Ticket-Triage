@@ -26,4 +26,7 @@ data/
 weights/
 checkpoints/
 
+.env
+.env.local
+.env.*.local
 
