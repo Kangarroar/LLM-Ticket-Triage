@@ -1,0 +1,71 @@
+# IT Ticket LLM Training Configuration
+# Optimized for GTX 1650 Mobile...
+# Can't val on 4gb vram
+
+model:
+  name: "Qwen/Qwen2.5-1.5B"
+  max_length: 192
+
+# QLoRA / LoRA Configuration
+lora:
+  r: 8  # LoRA rank
+  lora_alpha: 16
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+  lora_dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+
+# Quantization
+quantization:
+  load_in_4bit: true
+  compute_dtype: "float32"  # Options: float32, float16, bfloat16
+  quant_type: "nf4"  # Options: nf4, fp4
+  use_double_quant: true
+
+# Training Hyperparameters
+training:
+  output_dir: "./models/adapters/qwen_1.5b_it_tickets"
+  num_train_epochs: 3
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8 
+  learning_rate: 0.0002
+  lr_scheduler_type: "cosine"
+  warmup_steps: 100
+  weight_decay: 0.01
+  
+  # Logging & Evaluation
+  logging_steps: 1 
+  logging_first_step: true
+  log_level: "info"
+  eval_strategy: "epoch"  
+  eval_steps: 1
+  eval_accumulation_steps: 1 
+  save_strategy: "steps"
+  save_steps: 300
+  save_total_limit: 3
+  
+  # Performance
+  precision: "fp32"  # Options: fp32, fp16, bf16
+  optim: "adamw_torch"
+  gradient_checkpointing: true # If disabled 20s/it > 250s/it???????
+  max_grad_norm: 1.0
+  
+  # Other
+  seed: 42
+  load_best_model_at_end: false
+  metric_for_best_model: "eval_loss"
+  greater_is_better: false
+  remove_unused_columns: false
+  disable_tqdm: false
+  
+  # TensorBoard
+  report_to: "tensorboard"
+  logging_dir: "./logs/tensorboard"
+
+# Early Stopping
+early_stopping:
+  patience: 2
+  threshold: 0.001
