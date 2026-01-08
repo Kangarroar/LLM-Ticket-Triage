@@ -4,17 +4,17 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kangarroar/LLM-Ticket-Triage/blob/main/Google_Colab_Training.ipynb)
 [![Deployment](https://img.shields.io/badge/deployment-self--hosted-lightgrey.svg?style=flat-square)](#)
 
-This project is a **practical framework** for turning **raw IT
-issue text** into **strict, schema-constrained JSON tickets** for ITSM tools
-like Zoho, Jira, and ManageEngine.
+This project is a **practical framework** for turning **raw IT issue text** into **strict, schema-constrained JSON tickets** for ITSM tools like Zoho, Jira, and ManageEngine.
 
-The core idea: use a **small fine-tuned LLM** (e.g. Qwen 2.5 1.5B, TinyLLaMA,
-Phi-2 via QLoRA) to do closed-domain ticket structuring, not open-ended
-chat. The model maps:
+The core idea: use a **small fine-tuned LLM** (e.g. Qwen 2.5 1.5B, TinyLLaMA) to do closed-domain ticket structuring, not open-ended chat. The model maps:
 
-- Free text > summary, category, subcategory, application
-- Urgency, impact, assignment group
-- Confidence score for safe human override
+- Free text > summary, category, subcategory, priority
+- Assignment group routing
+- Request type classification (Incident vs. Service Request)
+
+Current Strategy: **Implicit Training + Explicit Inference**.
+- **Training**: Teaches the model the *behavior* of extracting and classifying data using varied, natural language instructions.
+- **Inference**: Enforces *compliance* by injecting a strict JSON schema (with Enums) into the system prompt.
 
 ---
 
@@ -25,31 +25,46 @@ chat. The model maps:
 - **More deterministic** and easier to validate against a fixed JSON schema
 - Inference can run on **~4 GB VRAM** GPUs with QLoRA/4b-quantization
 
-The model learns **schema mapping and label boundaries**, not general language.
+The model learns **domain-specific categorization** (e.g., "VPN issue" = "Network"), while the inference prompt guarantees the **JSON structure**.
 
 ---
 
-## High-Level Architecture
+## Workflow & Architecture
 
-**Create ticket first, enrich later:**
+**1. Generate Data (Synthetic)**
+Use `generating/synthetic_data_generation.py` to create thousands of varied IT tickets. It rotates instructions to prevent overfitting.
+*For real deployment the dataset should be composed by real tickets already categorized and structured!*
 
-1. User submits a ticket in the ITSM tool.
-2. Ticket is created immediately with minimal required fields.
-3. A background worker (polling, API, task or webhook) picks up new tickets.
-4. The LLM generates structured JSON + confidence.
-5. The ticket is updated; low-confidence results can fall back to human triage. (No ticket loss, easy retries)
+**2. Train (Colab)**
+Fine-tune the model using **QLoRA** on Google Colab (free tier supported).
+- **Interactive Forms**: Configure rank, alpha, learning rate, and epochs via UI.
+- **TensorBoard**: integrated for real-time loss monitoring.
+- **Auto-Save**: Adapters saved to Google Drive or downloaded as Zip.
+*Config file for local training is optimized for a 1650 Mobile GPU.*
+
+**3. Deploy & Infer**
+The notebook includes an **inference test** cell that loads the adapter and strictly forces the output schema:
+```json
+{
+  "summary": "...",
+  "category": "Hardware",
+  "subcategory": "Other",
+  "priority": "High",
+  ...
+}
+```
 
 ---
 
 ## Repo Structure (Overview)
 
-- `configs/` – Model and schema config stubs (e.g. QLoRA settings, ticket schema).
-- `training/` – QLoRA training entrypoint, synthetic data generator, dataset wrappers.
-- `inference/` – Prediction engine, schemas, post-processing, FastAPI app, worker.
-- `itsm_integrations/` – Zoho, Jira, ManageEngine client stubs + polling/webhook loop.
-- `data/` – `raw/` and `processed/` data directories
-- `scripts/` – Utility scripts for env setup and adapter export.
-- `tests/` – Simple smoke tests for schemas and the dummy prediction engine.
+- `Google_Colab_Training.ipynb` – **Main Entrypoint**. End-to-end training/inference notebook.
+- `configs/` – Model and schema config stubs.
+- `training/` – Training scripts (`train_lora.py`) and synthetic data tools.
+- `inference/` – Prediction engine and schema definitions.
+- `data/` – `processed/` directory for JSONL datasets.
+- `scripts/` – Utility scripts (e.g., `start_tensorboard.py`).
+- `tests/` – Simple smoke tests.
 
 ---
 
@@ -57,18 +72,15 @@ The model learns **schema mapping and label boundaries**, not general language.
 
 Included:
 
-- Training scripts & inference code
-- Ticket **schema stubs** and example IO
-- ITSM integration **client stubs**
+- **End-to-End Colab Notebook** (Data Gen -> Train -> Monitor -> Save)
+- **Synthetic Data Generator** (Typos, Spanish mix)
+- **Schema-First Logic**
 - Basic project layout ready for extension
 
 Not included:
 
-- Real IT ticket data
-- Trained model or adapter weights
+- Real IT ticket data.
+- Pre-trained model weights.
 
 
 This repository provides a production-oriented implementation designed to be deployed and fine-tuned **by the user** within their own environment, using their own ticket data, schemas, and ITSM systems.
-
-
-
