@@ -1,32 +1,29 @@
-# Python artifacts
+
+# Python and IDE
 __pycache__/
 *.py[cod]
-*.pyo
-
-# Virtual environments
-.venv/
-venv/
-env/
-
-# OS / editor noise
-.DS_Store
-.idea/
+*$py.class
+*.swp
 .vscode/
 
-# Model artifacts
-models/
-*.pt
-*.bin
-*.safetensors
-*.ckpt
-*.onnx
+# Environment
+.venv/
+.env
 
-# Training and data
-data/
-weights/
+# Training Outputs
+output/
+logs/
 checkpoints/
 
-.env
-.env.local
-.env.*.local
+# Data
+data/raw/
+data/processed/
 
+# Models
+models/
+!models/.gitkeep
+
+# Sensitive / Local Scripts
+run_training.bat
+run_tensorboard.bat
+logs/tensorboard/
