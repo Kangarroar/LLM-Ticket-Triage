@@ -9,87 +9,93 @@ import re
 
 # ZOHO
 CATEGORIES = [
-    "Application",
     "Hardware",
-    "Network",
-    "Access / Permissions",
-    "Email",
     "Software",
-    "Printer",
-    "Phone / Mobile"
+    "Access",
+    "Network",
+    "Security",
+    "Workplace"
 ]
 
-SUBCATEGORIES = {
-    "Application": ["Office / Excel", "Office / Outlook", "Office / Word", "Office / PowerPoint", "Browser", "Teams", "Other"],
-    "Hardware": ["Laptop", "Desktop", "Monitor", "Keyboard / Mouse", "Docking Station"],
-    "Network": ["VPN", "Wi-Fi", "Ethernet", "Internet Access"],
-    "Access / Permissions": ["Password Reset", "Account Locked", "Access Request", "Permissions"],
-    "Email": ["Cannot Send", "Cannot Receive", "Spam / Junk", "Configuration"],
-    "Software": ["Installation", "Update", "License", "Error"],
-    "Printer": ["Cannot Print", "Printer Offline", "Paper Jam", "Driver"],
-    "Phone / Mobile": ["Cannot Connect", "Lost Device", "Configuration"]
-}
+SUBCATEGORIES = [
+    "Login Issues",
+    "Permissions",
+    "Malware",
+    "Physical Security",
+    "Policy Violation",
+    "Other"
+]
 
-PRIORITIES = ["Low", "Medium", "High", "Urgent"]
+PRIORITIES = [
+    "Low",
+    "Medium",
+    "High",
+    "Critical"
+]
+
 ASSIGNMENT_GROUPS = [
     "End User Applications",
     "Network Operations",
     "Desktop Support",
     "Email / Messaging",
     "Security / Access",
-    "Hardware Support"
+    "Hardware Support",
+    "Facilities" 
 ]
+
 REQUEST_TYPES = ["Incident", "Service Request"]
+
+# Variability for prompt/qlora
+INSTRUCTION_VARIANTS = [
+    "Convert the following ticket into a valid JSON ITSM record using the allowed schema.",
+    "Classify and normalize this IT support request into the required JSON format.",
+    "Transform the user message into a structured IT ticket. Output JSON only.",
+    "Parse the user report and output the corresponding IT ticket JSON."
+]
 
 # Ticket templates (subject, description, category, subcategory, priority, assignment_group, request_type)
 TICKET_TEMPLATES = [
     ("Excel won't open", "When I try to open Excel, nothing happens. Need help urgently.", 
-     "Application", "Office / Excel", "High", "End User Applications", "Incident"),
+     "Software", "Other", "High", "End User Applications", "Incident"),
     ("Excel file corrupted", "My spreadsheet file is showing errors and won't open properly.",
-     "Application", "Office / Excel", "Medium", "End User Applications", "Incident"),
-    ("Excel macro not working", "The macro I use daily stopped working after the last update.",
-     "Application", "Office / Excel", "Medium", "End User Applications", "Incident"),
+     "Software", "Other", "Medium", "End User Applications", "Incident"),
+    ("Outlook keeps crashing", "Outlook freezes and crashes every time I open it.",
+     "Software", "Other", "High", "Email / Messaging", "Incident"),
     
     ("Cannot send emails", "Outlook says it cannot connect to the server when I try to send.",
-     "Email", "Cannot Send", "High", "Email / Messaging", "Incident"),
-    ("Emails stuck in outbox", "My emails are stuck in the outbox and won't send.",
-     "Email", "Cannot Send", "Medium", "Email / Messaging", "Incident"),
-    ("Outlook keeps crashing", "Outlook freezes and crashes every time I open it.",
-     "Application", "Office / Outlook", "High", "End User Applications", "Incident"),
-    
+     "Software", "Other", "High", "Email / Messaging", "Incident"),
+     
     ("VPN not connecting", "I cannot connect to the VPN to access company resources.",
-     "Network", "VPN", "Urgent", "Network Operations", "Incident"),
-    ("VPN keeps disconnecting", "VPN connection drops every few minutes.",
-     "Network", "VPN", "High", "Network Operations", "Incident"),
-    
-    ("Forgot my password", "I forgot my password and cannot log in.",
-     "Access / Permissions", "Password Reset", "High", "Security / Access", "Service Request"),
-    ("Account locked", "My account is locked after too many failed login attempts.",
-     "Access / Permissions", "Account Locked", "High", "Security / Access", "Incident"),
-    ("Need access to shared folder", "I need access to the Finance shared folder.",
-     "Access / Permissions", "Access Request", "Medium", "Security / Access", "Service Request"),
-    
-    ("Laptop screen flickering", "My laptop screen keeps flickering and going black.",
-     "Hardware", "Laptop", "High", "Hardware Support", "Incident"),
-    ("Keyboard not working", "Some keys on my keyboard stopped working.",
-     "Hardware", "Keyboard / Mouse", "Medium", "Hardware Support", "Incident"),
-    ("Monitor not detected", "My external monitor is not being detected by my laptop.",
-     "Hardware", "Monitor", "Medium", "Hardware Support", "Incident"),
-    
-    ("Printer offline", "The office printer shows as offline and I cannot print.",
-     "Printer", "Printer Offline", "Medium", "Desktop Support", "Incident"),
-    ("Cannot print", "I click print but nothing happens.",
-     "Printer", "Cannot Print", "Medium", "Desktop Support", "Incident"),
-    
-    ("Need software installation", "I need Adobe Acrobat installed on my computer.",
-     "Software", "Installation", "Low", "Desktop Support", "Service Request"),
-    ("Software update failed", "The software update failed with an error code.",
-     "Software", "Update", "Medium", "Desktop Support", "Incident"),
-
-    ("No internet connection", "I have no internet connection on my workstation.",
-     "Network", "Internet Access", "Urgent", "Network Operations", "Incident"),
+     "Network", "Login Issues", "Critical", "Network Operations", "Incident"), # Login/Connect issue
     ("Wi-Fi keeps dropping", "My Wi-Fi connection drops constantly.",
-     "Network", "Wi-Fi", "High", "Network Operations", "Incident"),
+     "Network", "Other", "High", "Network Operations", "Incident"),
+    ("No internet connection", "I have no internet connection on my workstation.",
+     "Network", "Other", "Critical", "Network Operations", "Incident"),
+
+    ("Forgot my password", "I forgot my password and cannot log in.",
+     "Access", "Login Issues", "High", "Security / Access", "Service Request"),
+    ("Account locked", "My account is locked after too many failed login attempts.",
+     "Access", "Login Issues", "High", "Security / Access", "Incident"),
+    ("Need access to shared folder", "I need access to the Finance shared folder.",
+     "Access", "Permissions", "Medium", "Security / Access", "Service Request"),
+     
+    ("Suspicious email", "I received a suspicious email that looks like phishing.",
+     "Security", "Malware", "High", "Security / Access", "Incident"), # Close enough to malware/security threat
+    ("Antivirus warning", "My antivirus popped up a warning about a trojan.",
+     "Security", "Malware", "Critical", "Security / Access", "Incident"),
+
+    ("Laptop screen flickering", "My laptop screen keeps flickering and going black.",
+     "Hardware", "Other", "High", "Hardware Support", "Incident"),
+    ("Keyboard not working", "Some keys on my keyboard stopped working.",
+     "Hardware", "Other", "Medium", "Hardware Support", "Incident"),
+    ("Printer offline", "The office printer shows as offline and I cannot print.",
+     "Hardware", "Other", "Medium", "Desktop Support", "Incident"),
+     
+    ("Lost badge", "I lost my ID badge and cannot enter the building.",
+     "Workplace", "Physical Security", "Medium", "Facilities", "Incident"),
+     
+    ("Installing unauthorized software", "I saw someone installing games on the office PC.",
+     "Security", "Policy Violation", "Low", "Security / Access", "Incident"),
 ]
 
 
@@ -206,9 +212,10 @@ def generate_synthetic_tickets(num_tickets: int = 3000,
                 "assignment_group": group,
                 "request_type": req_type
             }
+            chosen_instruction = random.choice(INSTRUCTION_VARIANTS)
             
             tickets.append({
-                "instruction": "Convert to schema.",
+                "instruction": chosen_instruction,
                 "input": input_text,
                 "output": json.dumps(output_json, ensure_ascii=False)
             })
@@ -262,8 +269,9 @@ def main():
     print("\n[Examples]")
     for i in range(min(3, len(tickets))):
         print(f"\nExample {i+1}:")
-        print(f"  Input:  {tickets[i]['input']}")
-        print(f"  Output: {tickets[i]['output']}")
+        print(f"  Instruction: {tickets[i]['instruction'][:50]}...")
+        print(f"  Input:       {tickets[i]['input']}")
+        print(f"  Output:      {tickets[i]['output']}")
     
     # Split and save
     print("\n[2/2] Splitting and saving...")
@@ -277,4 +285,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
