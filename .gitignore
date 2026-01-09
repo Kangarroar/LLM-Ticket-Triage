@@ -20,7 +20,7 @@ data/raw/
 data/processed/
 
 # Models
-models/
+models/base_models/
 !models/.gitkeep
 
 # Sensitive / Local Scripts
