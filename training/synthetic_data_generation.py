@@ -212,17 +212,13 @@ def generate_synthetic_tickets(num_tickets: int = 3000,
                 "assignment_group": group,
                 "request_type": req_type
             }
-            chosen_instruction = random.choice(INSTRUCTION_VARIANTS)
-            
             tickets.append({
-                "instruction": chosen_instruction,
+                "instruction": random.choice(INSTRUCTION_VARIANTS),
                 "input": input_text,
                 "output": json.dumps(output_json, ensure_ascii=False)
             })
-            
             if len(tickets) >= num_tickets:
                 break
-        
         if len(tickets) >= num_tickets:
             break
     
