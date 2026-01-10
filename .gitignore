@@ -27,3 +27,5 @@ models/base_models/
 run_training.bat
 run_tensorboard.bat
 logs/tensorboard/
+
+inference_report.html
