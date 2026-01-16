@@ -215,9 +215,20 @@ def load_datasets(data_dir: Path):
     return dataset
 
 
+import shutil
+
 def main():
     # Setup paths
-    project_root = Path(__file__).parent.parent
+    project_root = Path(__file__).resolve().parent.parent
+    
+    # Load common config 
+    common_config_path = project_root / "configs" / "common.yaml"
+    with open(common_config_path, "r", encoding="utf-8") as f:
+        common_config = yaml.safe_load(f)
+
+    # Use default adapter path from common config
+    DEFAULT_ADAPTER_PATH = project_root / common_config["paths"]["default_adapter_path"]
+
     config_path = project_root / "configs" / "training_config.yaml"
     data_dir = project_root / "data" / "processed"
     
@@ -290,7 +301,7 @@ def main():
     # Save final model
     print("\n" + "=" * 60)
     print("Saving model...")
-    final_model_path = project_root / "models" / "adapters" / "qwen_1.5b_it_tickets_final"
+    final_model_path = DEFAULT_ADAPTER_PATH
     trainer.save_model(str(final_model_path))
     tokenizer.save_pretrained(str(final_model_path))
     

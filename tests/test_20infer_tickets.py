@@ -7,26 +7,33 @@ from peft import PeftModel
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
 # Config
-MODEL_NAME = "Qwen/Qwen2.5-1.5B"
-ADAPTER_PATH = "./models/adapters/qwen2-1.5B-IT-Ticket" # I should make this a single var on a single common file...
+import yaml
+from pathlib import Path
+
+# Load Config
+def get_config():
+    project_root = Path(__file__).resolve().parents[1]
+    config_path = project_root / "configs" / "common.yaml"
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f), project_root
+
+config, PROJECT_ROOT = get_config()
+
+# Configs from YAML
+BASE_MODEL_NAME = config["model"]["base_model_name"]
+DEFAULT_ADAPTER_PATH = PROJECT_ROOT / config["paths"]["default_adapter_path"]
+CATEGORIES = config["schema"]["categories"]
+SUBCATEGORIES = config["schema"]["subcategories"]
+PRIORITIES = config["schema"]["priorities"]
+ASSIGNMENT_GROUPS = config["schema"]["assignment_groups"]
+VALID_RELATIONSHIPS = config["schema"]["valid_relationships"]
+
+# Config
+MODEL_NAME = BASE_MODEL_NAME
+ADAPTER_PATH = str(DEFAULT_ADAPTER_PATH)
 
 # Schema Definition
-CATEGORIES = ["Hardware", "Software", "Access", "Network", "Security", "Workplace"]
-SUBCATEGORIES = ["Login Issues", "Permissions", "Malware", "Physical Security", "Policy Violation", "Other"]
-PRIORITIES = ["Low", "Medium", "High", "Critical"]
-ASSIGNMENT_GROUPS = [
-    "End User Applications", "Network Operations", "Desktop Support", 
-    "Email / Messaging", "Security / Access", "Hardware Support", "Facilities"
-]
 
-VALID_RELATIONSHIPS = {
-    "Hardware": ["Other", "Physical Security"],
-    "Software": ["Other", "Login Issues"],
-    "Access": ["Login Issues", "Permissions", "Policy Violation"],
-    "Network": ["Login Issues", "Other"],
-    "Security": ["Malware", "Policy Violation", "Permissions", "Login Issues", "Other"],
-    "Workplace": ["Physical Security", "Other"]
-}
 
 class TriageModel:
     def __init__(self):

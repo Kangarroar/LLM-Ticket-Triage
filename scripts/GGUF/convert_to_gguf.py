@@ -1,12 +1,26 @@
 import os
 import subprocess
 import sys
+import yaml
 from pathlib import Path
 
 LLAMA_CPP_REPO = "https://github.com/ggerganov/llama.cpp"
 LLAMA_CPP_DIR = Path("llama.cpp")
 
-MERGED_MODEL_DIR = Path("../qwen2-1.5b-merged")
+# Load Config
+def get_config():
+    try:
+        project_root = Path(__file__).resolve().parents[2]
+        config_path = project_root / "configs" / "common.yaml"
+        with open(config_path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f), project_root
+    except Exception as e:
+        print(f"Error loading config: {e}")
+        exit(1)
+
+config, PROJECT_ROOT = get_config()
+MERGED_MODEL_DIR = PROJECT_ROOT / config["paths"]["merged_model_dir"]
+
 F16_GGUF = "qwen2-1.5b-merged-f16.gguf"
 Q4_GGUF = "qwen2-1.5b-merged-q4_k_m.gguf"
 QUANT_TYPE = "Q4_K_M" #?

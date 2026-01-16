@@ -10,30 +10,39 @@ from transformers import (
     BitsAndBytesConfig
 )
 
+import yaml
+from pathlib import Path
+
+# Load Config
+def get_config():
+    project_root = Path(__file__).resolve().parents[1]
+    config_path = project_root / "configs" / "common.yaml"
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f), project_root
+
+config, PROJECT_ROOT = get_config()
+
+# Configs from YAML
+BASE_MODEL_NAME = config["model"]["base_model_name"]
+DEFAULT_ADAPTER_PATH = PROJECT_ROOT / config["paths"]["default_adapter_path"]
+CATEGORIES = config["schema"]["categories"]
+SUBCATEGORIES = config["schema"]["subcategories"]
+PRIORITIES = config["schema"]["priorities"]
+ASSIGNMENT_GROUPS = config["schema"]["assignment_groups"]
+VALID_RELATIONSHIPS = config["schema"]["valid_relationships"]
+
 # Setup paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
-adapter_path = os.path.join(root_dir, "models", "adapters", "qwen_1.5b_it_tickets_final")
-model_name = "Qwen/Qwen2.5-1.5B"
+adapter_path = str(DEFAULT_ADAPTER_PATH)
+model_name = BASE_MODEL_NAME
 
 print(f"Checking adapter path: {adapter_path}")
 if not os.path.exists(adapter_path):
     print("WARNING: Adapter path not found. Please ensure training has completed and adapter is saved.")
 
 # Config
-CATEGORIES = ["Hardware", "Software", "Access", "Network", "Security", "Workplace"]
-SUBCATEGORIES = ["Login Issues", "Permissions", "Malware", "Physical Security", "Policy Violation", "Other"]
-PRIORITIES = ["Low", "Medium", "High", "Critical"]
-ASSIGNMENT_GROUPS = ["End User Applications", "Network Operations", "Desktop Support", "Email / Messaging", "Security / Access", "Hardware Support", "Facilities"]
 
-VALID_RELATIONSHIPS = {
-    "Hardware": ["Other", "Physical Security"],
-    "Software": ["Other", "Login Issues"],
-    "Access": ["Login Issues", "Permissions", "Policy Violation"],
-    "Network": ["Login Issues", "Other"],
-    "Security": ["Malware", "Policy Violation", "Permissions", "Login Issues"],
-    "Workplace": ["Physical Security", "Other"]
-}
 
 # Loading
 print(f"Loading Base Model: {model_name}...")
